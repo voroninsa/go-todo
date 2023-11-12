@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"go-todo/internal/common"
 	"go-todo/internal/storage"
 	"net/http"
 	"strconv"
@@ -29,6 +30,7 @@ func (ss *serverStore) TaskHandler(w http.ResponseWriter, r *http.Request) {
 			ss.deleteAllTasksHandler(w, r)
 		default:
 			http.Error(w, "invalid http method", http.StatusMethodNotAllowed)
+			return
 		}
 	} else {
 		str := strings.Split(r.URL.Path, "/task/")[1]
@@ -45,9 +47,42 @@ func (ss *serverStore) TaskHandler(w http.ResponseWriter, r *http.Request) {
 			ss.deleteTaskHandler(w, r, id)
 		default:
 			http.Error(w, "invalid http method (request with id)", http.StatusMethodNotAllowed)
+			return
 		}
 
 	}
+}
+
+func (ss *serverStore) DueHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/due/" {
+		switch r.Method {
+		case http.MethodGet:
+			ss.getTasksByDueDateHandler(w, r)
+		default:
+			http.Error(w, "invalid http method", http.StatusMethodNotAllowed)
+			return
+		}
+
+	} else {
+		http.Error(w, "please enter date", http.StatusBadRequest)
+	}
+
+}
+
+func (ss *serverStore) getTasksByDueDateHandler(w http.ResponseWriter, r *http.Request) {
+	year, month, day, err := common.UrlToDate(r.URL.Path)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	tasks, err := json.Marshal(ss.store.GetTasksByDueDate(year, month, day))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(tasks)
 }
 
 func (ss *serverStore) postTaskHandler(w http.ResponseWriter, r *http.Request) {
@@ -58,7 +93,7 @@ func (ss *serverStore) postTaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := json.Marshal(ss.store.CreateTask(task.Text, task.Due))
+	id, err := json.Marshal(ss.store.CreateTask(task.Text, task.Tags, task.Due))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -7,10 +7,10 @@ import (
 )
 
 type Task struct {
-	Id   int    `json:"id"`
-	Text string `json:"text"`
-	// Tags []string  `json:"tags"`
-	Due time.Time `json:"due"`
+	Id   int       `json:"id"`
+	Text string    `json:"text"`
+	Tags []string  `json:"tags"`
+	Due  time.Time `json:"due"`
 }
 
 type TaskStore struct {
@@ -28,7 +28,7 @@ func New() *TaskStore {
 	return ts
 }
 
-func (ts *TaskStore) CreateTask(text string, due time.Time) int {
+func (ts *TaskStore) CreateTask(text string, tags []string, due time.Time) int {
 	ts.Lock()
 	defer ts.Unlock()
 
@@ -37,8 +37,8 @@ func (ts *TaskStore) CreateTask(text string, due time.Time) int {
 		Text: text,
 		Due:  due,
 	}
-	// task.Tags = make([]string, len(tags))
-	// copy(task.Tags, tags)
+	task.Tags = make([]string, len(tags))
+	copy(task.Tags, tags)
 
 	ts.tasks[ts.nextId] = task
 	ts.nextId++
