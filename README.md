@@ -3,9 +3,10 @@
 
 ### Endpoints
 ```
-POST    /task      : формирует задачу по введенным Text и Due
-GET     /task      : возвращает все назначенные задачи
-DELETE  /task      : удаляет все задачи
-GET     /task/{id} : выводит задачу с {id}
-DELETE  /task/{id} : удаляет задачу с {id}
+POST    /task       : формирует задачу по введенным Text и Due
+GET     /task       : возвращает все назначенные задачи
+DELETE  /task       : удаляет все задачи
+GET     /task/{id}  : выводит задачу с {id}
+DELETE  /task/{id}  : удаляет задачу с {id}
+GET     /due/{date} : возвращает задачи с указанной датой (YYYYMMDD)
 ```
