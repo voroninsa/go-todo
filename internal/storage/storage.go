@@ -92,24 +92,24 @@ func (ts *TaskStore) GetAllTasks() []Task {
 	return allTasks
 }
 
-// func (ts *TaskStore) GetTasksByTag(tag string) []Task {
-// 	ts.Lock()
-// 	defer ts.Unlock()
+func (ts *TaskStore) GetTasksByTag(tag string) []Task {
+	ts.Lock()
+	defer ts.Unlock()
 
-// 	var tasks []Task
+	var tasks []Task
 
-// taskloop:
-// 	for _, task := range ts.tasks {
-// 		for _, taskTag := range task.Tags {
-// 			if taskTag == tag {
-// 				tasks = append(tasks, task)
-// 				continue taskloop
-// 			}
-// 		}
-// 	}
+taskloop:
+	for _, task := range ts.tasks {
+		for _, taskTag := range task.Tags {
+			if taskTag == tag {
+				tasks = append(tasks, task)
+				continue taskloop
+			}
+		}
+	}
 
-// 	return tasks
-// }
+	return tasks
+}
 
 func (ts *TaskStore) GetTasksByDueDate(year int, month time.Month, day int) []Task {
 	ts.Lock()

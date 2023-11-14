@@ -1,0 +1,57 @@
+.modalok {
+    height: 100vh;
+    width: 100vw;
+    background-color: rgba(0, 0, 0, 0.4);
+    position: fixed;
+    top: 0px;  
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.4s;
+}
+
+.modalok.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modalok__content {
+    padding: 20px;
+    border-radius: 12px;
+    background-color: white;
+    width: 20vw;
+    transform: scale(0.5);
+    transition: 0.2s all;
+}
+
+.modalok__content.active {
+    transform: scale(1);
+}
+
+.new_modal {
+    margin: 10px;
+}
+
+.new_modal__entering p {
+    margin-bottom: 5px;
+}
+
+.new_modal__buttons {
+    margin-top: 50px;
+    width: auto;
+    position: sticky;
+    background-color: rgba(35, 35, 239, 0.913);
+    color: white;
+    padding: 1.5vh;
+    border-radius: 20px;
+    transition: all 0.2s; 
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.new_modal__buttons:hover {
+    opacity: 0.6;
+}

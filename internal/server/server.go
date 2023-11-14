@@ -65,8 +65,37 @@ func (ss *serverStore) DueHandler(w http.ResponseWriter, r *http.Request) {
 
 	} else {
 		http.Error(w, "please enter date", http.StatusBadRequest)
+		return
 	}
 
+}
+
+func (ss *serverStore) TagHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/tag/" {
+		switch r.Method {
+		case http.MethodGet:
+			ss.GetTasksByTagHandler(w, r)
+		default:
+			http.Error(w, "invalid http method", http.StatusMethodNotAllowed)
+			return
+		}
+
+	} else {
+		http.Error(w, "please enter tag", http.StatusBadRequest)
+		return
+	}
+}
+
+func (ss *serverStore) GetTasksByTagHandler(w http.ResponseWriter, r *http.Request) {
+	tag := strings.Split(r.URL.Path, "/tag/")[1]
+
+	tasks, err := json.Marshal(ss.store.GetTasksByTag(tag))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(tasks)
 }
 
 func (ss *serverStore) getTasksByDueDateHandler(w http.ResponseWriter, r *http.Request) {
