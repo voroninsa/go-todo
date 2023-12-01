@@ -22,6 +22,8 @@ func NewStorage() *serverStore {
 func (ss *serverStore) TaskHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/task/" {
 		switch r.Method {
+		case http.MethodOptions:
+			ss.OptionsHandler(w, r)
 		case http.MethodGet:
 			ss.getAllTasksHandler(w, r)
 		case http.MethodPost:
@@ -86,6 +88,13 @@ func (ss *serverStore) TagHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (ss *serverStore) OptionsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+	w.Header().Add("Access-Control-Allow-Methods", "GET,POST,DELETE")
+	w.Header().Add("Access-Control-Allow-Headers", "*")
+	w.Header().Add("Access-Control-Max-Age", "86400")
+}
+
 func (ss *serverStore) GetTasksByTagHandler(w http.ResponseWriter, r *http.Request) {
 	tag := strings.Split(r.URL.Path, "/tag/")[1]
 
@@ -142,6 +151,7 @@ func (ss *serverStore) getAllTasksHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	w.Header().Add("Origin", "*")
 	w.Write(ts)
 }
 
@@ -171,6 +181,7 @@ func (ss *serverStore) getTaskHandler(w http.ResponseWriter, r *http.Request, id
 func (ss *serverStore) deleteTaskHandler(w http.ResponseWriter, r *http.Request, id int) {
 	if err := ss.store.DeleteTask(id); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	str := []byte(fmt.Sprintf("task with id = %d deleted", id))

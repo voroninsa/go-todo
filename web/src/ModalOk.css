@@ -23,6 +23,7 @@
     border-radius: 12px;
     background-color: white;
     width: 20vw;
+    min-width: 200px;
     transform: scale(0.5);
     transition: 0.2s all;
 }
