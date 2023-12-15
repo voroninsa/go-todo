@@ -23,7 +23,7 @@ func (ss *serverStore) TaskHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/task/" {
 		switch r.Method {
 		case http.MethodOptions:
-			ss.OptionsHandler(w, r)
+			ss.optionsHandler(w, r)
 		case http.MethodGet:
 			ss.getAllTasksHandler(w, r)
 		case http.MethodPost:
@@ -47,6 +47,8 @@ func (ss *serverStore) TaskHandler(w http.ResponseWriter, r *http.Request) {
 			ss.getTaskHandler(w, r, id)
 		case http.MethodDelete:
 			ss.deleteTaskHandler(w, r, id)
+		case http.MethodPatch:
+			ss.patchTaskHandler(w, r, id)
 		default:
 			http.Error(w, "invalid http method (request with id)", http.StatusMethodNotAllowed)
 			return
@@ -88,7 +90,7 @@ func (ss *serverStore) TagHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (ss *serverStore) OptionsHandler(w http.ResponseWriter, r *http.Request) {
+func (ss *serverStore) optionsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.Header().Add("Access-Control-Allow-Methods", "GET,POST,DELETE")
 	w.Header().Add("Access-Control-Allow-Headers", "*")
@@ -185,5 +187,22 @@ func (ss *serverStore) deleteTaskHandler(w http.ResponseWriter, r *http.Request,
 	}
 
 	str := []byte(fmt.Sprintf("task with id = %d deleted", id))
+	w.Write(str)
+}
+
+func (ss *serverStore) patchTaskHandler(w http.ResponseWriter, r *http.Request, id int) {
+	var task storage.Task
+
+	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := ss.store.PatchTask(id, task.Text, task.Tags, task.Due); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	str := []byte(fmt.Sprintf("patched task with id = %d", id))
 	w.Write(str)
 }

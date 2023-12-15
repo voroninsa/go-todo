@@ -1,30 +1,32 @@
 import React from 'react'
 import './Tasks.css'
+import state from './States'
+import * as request from './Request'
 import remove from './Images/remove.png'
+import patch from './Images/patch.png'
 
-const Tasks = ({tasks, getFetch, setMessageModal, setModalActive}) => {
+const Tasks = () => {
 
     const deleteClick = (id) => {
-        const url = `/task/${id}`
-        fetch(url, {
-            method: 'DELETE'
-        })
-        .catch(setMessageModal({title: 'Error!', message: 'Server Internal Error'}))
-        .then((res) => {
-            if (!res.ok) {
-                setMessageModal({title: 'Error!', message: 'Error removing task'});
-            } else {
-                setMessageModal({title: 'Success!', message: 'Task was removed'});
-            }
-        })
+        state.setIdTask(id)
+        request.fetchDelete();
 
-        setModalActive(true);
-        getFetch();
+        state.setModalOkActive(true);
+        request.fetchGet();
+    }
+
+    const patchClick = (id, text, tags, due) => {
+        console.log(state.tasks);
+        state.setIdTask(id);
+        state.setTextTask(text);
+        state.setTagsTask(tags);
+        state.setDueTask(due);
+        state.setModalActive(true);
     }
 
     return(
         <ul className="tasks">
-            {tasks.map(x => (
+            {React.Children.toArray(state.tasks.map(x => (
                 <li>
                     <div className="task">
                         <h4>Task:</h4>
@@ -39,15 +41,20 @@ const Tasks = ({tasks, getFetch, setMessageModal, setModalActive}) => {
 
                     <div className="buttons">
                         <div>
-                            <a onClick={() => deleteClick(x.id)}>
+                            <a onClick={() => deleteClick(x.id)} title="Delete task">
                                 <img className="image" src={remove}></img>
                             </a>
                         </div>
-                      
+                        <div>                      
+                            <a onClick={() => patchClick(x.id, x.text, x.tags.join(', '), x.due.slice(0, 10))} title="Patch task">
+                                <img className="image" src={patch}></img>
+                            </a>
+                        </div>
+
                     </div>
                         
                 </li>
-            ))}
+            )))}
 
         </ul> 
     );

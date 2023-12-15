@@ -7,10 +7,11 @@ import (
 )
 
 type Task struct {
-	Id   int       `json:"id"`
-	Text string    `json:"text"`
-	Tags []string  `json:"tags"`
-	Due  time.Time `json:"due"`
+	Id        int       `json:"id"`
+	Text      string    `json:"text"`
+	Tags      []string  `json:"tags"`
+	Due       time.Time `json:"due"`
+	Completed bool      `json:"completed"`
 }
 
 type TaskStore struct {
@@ -23,7 +24,7 @@ type TaskStore struct {
 func New() *TaskStore {
 	ts := &TaskStore{}
 	ts.tasks = make(map[int]Task)
-	ts.nextId = 0
+	ts.nextId = 1
 
 	return ts
 }
@@ -54,8 +55,29 @@ func (ts *TaskStore) GetTask(id int) (Task, error) {
 	if ok {
 		return task, nil
 	} else {
-		return Task{}, fmt.Errorf("task with such id = %d not found", id)
+		return Task{}, fmt.Errorf("task with id = %d not found", id)
 	}
+}
+
+func (ts *TaskStore) PatchTask(id int, text string, tags []string, due time.Time) error {
+	ts.Lock()
+	defer ts.Unlock()
+
+	task := Task{
+		Id:   id,
+		Text: text,
+		Due:  due,
+	}
+	task.Tags = make([]string, len(tags))
+	copy(task.Tags, tags)
+
+	if ts.tasks[id].Id != 0 {
+		ts.tasks[id] = task
+	} else {
+		return fmt.Errorf("Task with id = %d not found", id)
+	}
+
+	return nil
 }
 
 func (ts *TaskStore) DeleteTask(id int) error {
@@ -83,7 +105,8 @@ func (ts *TaskStore) GetAllTasks() []Task {
 	ts.Lock()
 	defer ts.Unlock()
 
-	var allTasks []Task
+	// var allTasks []Task
+	allTasks := make([]Task, 0, len(ts.tasks))
 
 	for _, task := range ts.tasks {
 		allTasks = append(allTasks, task)

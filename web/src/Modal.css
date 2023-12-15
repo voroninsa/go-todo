@@ -31,3 +31,61 @@
 .modal__content.active {
     transform: scale(1);
 }
+
+.new_task {
+    margin: 10px;
+}
+
+.new_task__entering p {
+    text-align: left;
+    margin-left: 1vw;
+    margin-bottom: 5px;
+}
+
+.new_task__entering textarea {
+    width: 37vw;
+    min-width: 250px;
+    max-height: 50px;
+    height: 50px;
+    font-size: 20px;
+}
+
+.new_task__entering input {
+    width: 37vw;
+    min-width: 250px;
+    max-height: 50px;
+    height: 50px;
+    font-size: 20px;
+}
+
+.new_task__buttons {
+    margin-top: 50px;
+}
+
+.new_task__buttons :first-child {
+    background-color: rgba(35, 35, 239, 0.913);
+    color: white;
+    padding: 1.5vh;
+    padding-left: 2vw;
+    padding-right: 2vw;
+    border-radius: 20px;
+    transition: all 0.2s; 
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.new_task__buttons :last-child {
+    background-color: rgba(35, 35, 239, 0.913);
+    color: white;
+    padding: 1.5vh;
+    padding-left: 2vw;
+    padding-right: 2vw;
+    border-radius: 20px;
+    transition: all 0.2s; 
+    cursor: pointer;
+}
+
+.new_task__buttons a:hover {
+    opacity: 0.6;
+}
+
