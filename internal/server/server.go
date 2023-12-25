@@ -38,7 +38,7 @@ func (ss *serverStore) TaskHandler(w http.ResponseWriter, r *http.Request) {
 		str := strings.Split(r.URL.Path, "/task/")[1]
 		id, err := strconv.Atoi(str)
 		if err != nil {
-			http.Error(w, "incorrect id", http.StatusMethodNotAllowed)
+			http.Error(w, "incorrect id", http.StatusBadRequest)
 			return
 		}
 
@@ -92,7 +92,7 @@ func (ss *serverStore) TagHandler(w http.ResponseWriter, r *http.Request) {
 
 func (ss *serverStore) optionsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Access-Control-Allow-Origin", "*")
-	w.Header().Add("Access-Control-Allow-Methods", "GET,POST,DELETE")
+	w.Header().Add("Access-Control-Allow-Methods", "GET,POST,DELETE,PATCH")
 	w.Header().Add("Access-Control-Allow-Headers", "*")
 	w.Header().Add("Access-Control-Max-Age", "86400")
 }
@@ -198,7 +198,7 @@ func (ss *serverStore) patchTaskHandler(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	if err := ss.store.PatchTask(id, task.Text, task.Tags, task.Due); err != nil {
+	if err := ss.store.PatchTask(id, task.Text, task.Tags, task.Due, task.Completed); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

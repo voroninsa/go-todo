@@ -59,23 +59,24 @@ func (ts *TaskStore) GetTask(id int) (Task, error) {
 	}
 }
 
-func (ts *TaskStore) PatchTask(id int, text string, tags []string, due time.Time) error {
+func (ts *TaskStore) PatchTask(id int, text string, tags []string, due time.Time, completed bool) error {
 	ts.Lock()
 	defer ts.Unlock()
 
+	if ts.tasks[id].Id == 0 {
+		return fmt.Errorf("Task with id = %d not found", id)
+	}
+
 	task := Task{
-		Id:   id,
-		Text: text,
-		Due:  due,
+		Id:        id,
+		Text:      text,
+		Due:       due,
+		Completed: completed,
 	}
 	task.Tags = make([]string, len(tags))
 	copy(task.Tags, tags)
 
-	if ts.tasks[id].Id != 0 {
-		ts.tasks[id] = task
-	} else {
-		return fmt.Errorf("Task with id = %d not found", id)
-	}
+	ts.tasks[id] = task
 
 	return nil
 }

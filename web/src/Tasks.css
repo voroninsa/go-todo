@@ -4,12 +4,12 @@
   margin: 0;
   padding: 0;
   flex-wrap: wrap;
-
 }
   
-.tasks li {
+.task__notmissed {
   display: flex;
   background-color: rgb(227, 217, 217);
+  /* background-color: rgb(227, 217, 217); */
   width: 20%;
   min-width: 300px;
   height: 30vh;
@@ -24,7 +24,24 @@
   animation: ani 1s forwards;
 }
 
-.task {
+.task__missed {
+  display: flex;
+  background-color: rgb(237, 174, 174);
+  width: 20%;
+  min-width: 300px;
+  height: 30vh;
+  min-height: 250px;
+  margin: calc(2.3vw - 0.05vw);
+  border-width: 0.05vw;
+  border-color: #eee;
+  border-style: solid;
+  border-radius: 4px;
+  overflow: auto;
+  transform: translateY(-150%);
+  animation: ani 1s forwards;
+}
+
+.task__content {
   margin-bottom: 2px;
   text-align: left;
   margin-left: 15px;
@@ -32,16 +49,16 @@
   font-size: calc(10px + 1vmin);
 }
 
-.task h4 {
+.task__content h4 {
   margin-top: 1.5vh;
   margin-bottom: 0.5vh;
 }
 
-.task p {
+.task__content p {
   margin: 0;
 }
 
-.buttons {
+.task__buttons {
   margin-left: auto;
   margin-right: 0;
   margin-top: 1.2vw;

@@ -3,41 +3,16 @@ import './App.css';
 import Modal from './Modal';
 import ModalOk from './ModalOk';
 import Tasks from './Tasks';
-import state from './States';
-import * as request from './Request';
+import NewState from './States';
+import NewRequest from './Request';
 
 const App = () => {
-  // const [modalActive, setModalActive] = useState(false)
-  // const [modalOkActive, setModalOkActive] = useState(false)
-  // const [message, setMessage] = useState({title: '', message: ''})
-  // const [idTask, setIdTask] = useState(0)
-  // const [textTask, setTextTask] = useState('')
-  // const [tagsTask, setTagsTask] = useState('')
-  // const [dueTask, setDueTask] = useState('')
-  // const [tasks, setTasks] = useState([])
+  const state = NewState();
+  const request = NewRequest(state);
 
   useEffect(() => {
-    request.fetchGet()
-    // getFetch();
+    request.fetchGet();
   }, [])
-
-  // const getFetch = () => {
-  //   const url = '/task/'
-
-  //   fetch(url, {
-  //     headers: {
-  //       'Access-Control-Allow-Origin': '*'
-  //     }
-  //   }) 
-  //     .then(res => res.json())
-  //     .then(array => {
-  //       array.sort((x, y) => x.id - y.id);
-  //       if (array != null) {
-  //       setTasks(array);
-  //     } else {
-  //       setTasks([]);
-  //     }})
-  // }
 
   return (
     <div className="app">
@@ -46,11 +21,11 @@ const App = () => {
         <a className="createtask__button" onClick={() => state.setModalActive(true)}>Create Task</a>  
       </header>  
 
-      <Tasks />
+      <Tasks state={state} />
 
-      <Modal />
+      <Modal state={state} />
 
-      <ModalOk />
+      <ModalOk state={state} />
 
     </div>
   );

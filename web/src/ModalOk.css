@@ -34,6 +34,7 @@
 
 .new_modal {
     margin: 10px;
+    opacity: inherit;
 }
 
 .new_modal__entering p {
@@ -42,15 +43,18 @@
 
 .new_modal__buttons {
     margin-top: 50px;
-    width: auto;
-    position: sticky;
+    margin-bottom: 20px;
+}
+
+.new_modal__buttons :first-child {
     background-color: rgba(35, 35, 239, 0.913);
     color: white;
-    padding: 1.5vh;
+    padding: 1.3vh;
+    padding-left: 4vw;
+    padding-right: 4vw;
     border-radius: 20px;
     transition: all 0.2s; 
     cursor: pointer;
-    margin-right: 10px;
 }
 
 .new_modal__buttons:hover {
