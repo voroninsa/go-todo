@@ -1,8 +1,8 @@
 package server
 
 import (
-	"go-todo/internal/server/handlers"
-	"go-todo/internal/storage"
+	"github.com/voroninsa/go-todo/internal/server/handlers"
+	"github.com/voroninsa/go-todo/internal/storage"
 )
 
 type ServerStore struct {

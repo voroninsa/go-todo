@@ -4,8 +4,9 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"go-todo/internal/storage"
 	"net/http"
+
+	"github.com/voroninsa/go-todo/internal/storage"
 )
 
 type Handlers struct {

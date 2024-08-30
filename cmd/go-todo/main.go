@@ -1,22 +1,29 @@
 package main
 
 import (
-	"fmt"
-	"go-todo/internal/server"
-	"log"
 	"net/http"
+	"os"
+
+	"github.com/voroninsa/go-todo/internal/server"
+	"github.com/voroninsa/go-todo/internal/utils/logger"
 )
 
 func main() {
-	s := server.NewStorage()
+	logger := logger.NewLogger()
+
+	storage := server.NewStorage()
 	mux := http.NewServeMux()
-	mux.HandleFunc("/task/", s.TaskHandler)
-	mux.HandleFunc("/due/", s.DueHandler)
-	mux.HandleFunc("/tag/", s.TagHandler)
+	mux.HandleFunc("/task/", storage.TaskHandler)
+	mux.HandleFunc("/due/", storage.DueHandler)
+	mux.HandleFunc("/tag/", storage.TagHandler)
 
 	fs := http.FileServer(http.Dir("./web/build"))
 	mux.Handle("/", fs)
 
-	fmt.Println("♥ server start listening at port :8080 ♥")
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	logger.Info("♥ server start listening at port :8080 ♥")
+	err := http.ListenAndServe(":8080", mux)
+	if err != nil {
+		logger.Sugar().Fatalf("fatal server error: ", err.Error())
+		os.Exit(1)
+	}
 }

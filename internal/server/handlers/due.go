@@ -2,8 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
-	"go-todo/internal/common"
 	"net/http"
+
+	"github.com/voroninsa/go-todo/internal/utils/common"
 )
 
 func (ss *Handlers) GetTasksByDueDateHandler(w http.ResponseWriter, r *http.Request) {
