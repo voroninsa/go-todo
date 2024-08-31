@@ -1,22 +1,46 @@
-package server
+package http
 
 import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/voroninsa/go-todo/http/handlers"
 )
 
-func (ss *ServerStore) TaskHandler(w http.ResponseWriter, r *http.Request) {
+type routes struct {
+	handlers handlers.Handlers
+}
+
+func NewRouter(handlers handlers.Handlers) *http.ServeMux {
+	r := &routes{
+		handlers: handlers,
+	}
+
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/task/", r.taskHandlers)
+	mux.HandleFunc("/due/", r.dueHandlers)
+	mux.HandleFunc("/tag/", r.tagHandlers)
+	mux.HandleFunc("/auth/", r.authHandler)
+
+	fs := http.FileServer(http.Dir("./web/build"))
+	mux.Handle("/", fs)
+
+	return mux
+}
+
+func (rs *routes) taskHandlers(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/task/" {
 		switch r.Method {
 		case http.MethodGet:
-			ss.Handlers.GetAllTasksHandler(w, r)
+			rs.handlers.GetAllTasksHandler(w, r)
 		case http.MethodPost:
-			ss.Handlers.PostTaskHandler(w, r)
+			rs.handlers.PostTaskHandler(w, r)
 		case http.MethodDelete:
-			ss.Handlers.DeleteAllTasksHandler(w, r)
+			rs.handlers.DeleteAllTasksHandler(w, r)
 		case http.MethodOptions:
-			ss.Handlers.OptionsHandler(w, r)
+			rs.handlers.OptionsHandler(w, r)
 		default:
 			http.Error(w, "invalid http method", http.StatusMethodNotAllowed)
 			return
@@ -31,11 +55,11 @@ func (ss *ServerStore) TaskHandler(w http.ResponseWriter, r *http.Request) {
 
 		switch r.Method {
 		case http.MethodGet:
-			ss.Handlers.GetTaskHandler(w, r, id)
+			rs.handlers.GetTaskHandler(w, r, id)
 		case http.MethodDelete:
-			ss.Handlers.DeleteTaskHandler(w, r, id)
+			rs.handlers.DeleteTaskHandler(w, r, id)
 		case http.MethodPatch:
-			ss.Handlers.PatchTaskHandler(w, r, id)
+			rs.handlers.PatchTaskHandler(w, r, id)
 		default:
 			http.Error(w, "invalid http method (request with id)", http.StatusMethodNotAllowed)
 			return
@@ -44,11 +68,11 @@ func (ss *ServerStore) TaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (ss *ServerStore) DueHandler(w http.ResponseWriter, r *http.Request) {
+func (rs *routes) dueHandlers(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/due/" {
 		switch r.Method {
 		case http.MethodGet:
-			ss.Handlers.GetTasksByDueDateHandler(w, r)
+			rs.handlers.GetTasksByDueDateHandler(w, r)
 		default:
 			http.Error(w, "invalid http method", http.StatusMethodNotAllowed)
 			return
@@ -61,11 +85,11 @@ func (ss *ServerStore) DueHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (ss *ServerStore) TagHandler(w http.ResponseWriter, r *http.Request) {
+func (rs *routes) tagHandlers(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/tag/" {
 		switch r.Method {
 		case http.MethodGet:
-			ss.Handlers.GetTasksByTagHandler(w, r)
+			rs.handlers.GetTasksByTagHandler(w, r)
 		default:
 			http.Error(w, "invalid http method", http.StatusMethodNotAllowed)
 			return
@@ -76,3 +100,5 @@ func (ss *ServerStore) TagHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func (rs *routes) authHandler(w http.ResponseWriter, r *http.Request) {}

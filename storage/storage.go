@@ -21,10 +21,11 @@ type TaskStore struct {
 	nextId int
 }
 
-func New() *TaskStore {
-	ts := &TaskStore{}
-	ts.tasks = make(map[int]Task)
-	ts.nextId = 1
+func NewStorage() *TaskStore {
+	ts := &TaskStore{
+		tasks:  make(map[int]Task),
+		nextId: 1,
+	}
 
 	return ts
 }
@@ -52,11 +53,11 @@ func (ts *TaskStore) GetTask(id int) (Task, error) {
 	defer ts.Unlock()
 
 	task, ok := ts.tasks[id]
-	if ok {
-		return task, nil
-	} else {
+	if !ok {
 		return Task{}, fmt.Errorf("task with id = %d not found", id)
 	}
+
+	return task, nil
 }
 
 func (ts *TaskStore) PatchTask(id int, text string, tags []string, due time.Time, completed bool) error {
