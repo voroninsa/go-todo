@@ -2,7 +2,6 @@ package common
 
 import (
 	"errors"
-	"flag"
 	"strconv"
 	"strings"
 	"time"
@@ -33,14 +32,4 @@ func UrlToDate(date string) (int, time.Month, int, error) {
 	}
 
 	return year, time.Month(month), day, nil
-}
-
-func ParseFlags() map[string]interface{} {
-	config := flag.String("config", "../config.json", "enter destination of project configuration file")
-	flag.Parse()
-
-	flags := make(map[string]interface{})
-	flags["config"] = *config
-
-	return flags
 }
