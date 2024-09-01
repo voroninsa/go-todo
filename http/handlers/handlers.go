@@ -2,7 +2,7 @@ package handlers
 
 import "github.com/voroninsa/go-todo/storage"
 
-type handlersGetter interface {
+type HandlersGetter interface {
 	taskHandlersGetter
 	tagHandlersGetter
 	dueHandlersGetter
@@ -16,7 +16,7 @@ type Handlers struct {
 	*authHandlers
 }
 
-func NewHandlers(storage *storage.TaskStore) handlersGetter {
+func NewHandlers(storage *storage.TaskStore) HandlersGetter {
 	return &Handlers{
 		NewTaskHandlers(storage).(*taskHandlers),
 		NewTagHandlers(storage).(*tagHandlers),

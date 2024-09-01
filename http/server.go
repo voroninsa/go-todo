@@ -17,11 +17,10 @@ type ServerRunner interface {
 }
 
 type serverImpl struct {
-	store    *storage.TaskStore
-	handlers handlers.Handlers
-	mux      *http.ServeMux
-	config   *config.Config
-	logger   *zap.Logger
+	store  *storage.TaskStore
+	mux    *http.ServeMux
+	config *config.Config
+	logger *zap.Logger
 }
 
 type ServerParams struct {
@@ -31,14 +30,13 @@ type ServerParams struct {
 }
 
 func NewServer(params ServerParams) ServerRunner {
-	handlers := handlers.NewHandlers(params.Storage).(*handlers.Handlers)
-	mux := NewRouter(*handlers)
+	handlers := handlers.NewHandlers(params.Storage)
+	mux := NewRouter(handlers)
 	return &serverImpl{
-		store:    params.Storage,
-		handlers: *handlers,
-		mux:      mux,
-		config:   params.Config,
-		logger:   params.Logger,
+		store:  params.Storage,
+		mux:    mux,
+		config: params.Config,
+		logger: params.Logger,
 	}
 }
 
