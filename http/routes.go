@@ -31,6 +31,7 @@ func NewRouter(handlers handlers.Handlers) *http.ServeMux {
 }
 
 func (rs *routes) taskHandlers(w http.ResponseWriter, r *http.Request) {
+	// get/post/delete all tasks
 	if r.URL.Path == "/task/" {
 		switch r.Method {
 		case http.MethodGet:
@@ -46,6 +47,7 @@ func (rs *routes) taskHandlers(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
+		// get/post/delete task by id
 		str := strings.Split(r.URL.Path, "/task/")[1]
 		id, err := strconv.Atoi(str)
 		if err != nil {
