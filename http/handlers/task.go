@@ -6,14 +6,30 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/voroninsa/go-todo/internal/storage"
+	"github.com/voroninsa/go-todo/storage"
 )
 
-type Handlers struct {
+type taskHandlersGetter interface {
+	PostTaskHandler(w http.ResponseWriter, r *http.Request)
+	GetAllTasksHandler(w http.ResponseWriter, r *http.Request)
+	DeleteAllTasksHandler(w http.ResponseWriter, r *http.Request)
+	GetTaskHandler(w http.ResponseWriter, r *http.Request, id int)
+	DeleteTaskHandler(w http.ResponseWriter, r *http.Request, id int)
+	PatchTaskHandler(w http.ResponseWriter, r *http.Request, id int)
+	OptionsHandler(w http.ResponseWriter, r *http.Request)
+}
+
+type taskHandlers struct {
 	store *storage.TaskStore
 }
 
-func (ss *Handlers) PostTaskHandler(w http.ResponseWriter, r *http.Request) {
+func NewTaskHandlers(storage *storage.TaskStore) taskHandlersGetter {
+	return &taskHandlers{
+		store: storage,
+	}
+}
+
+func (t *taskHandlers) PostTaskHandler(w http.ResponseWriter, r *http.Request) {
 	var task storage.Task
 
 	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
@@ -21,7 +37,7 @@ func (ss *Handlers) PostTaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := json.Marshal(ss.store.CreateTask(task.Text, task.Tags, task.Due))
+	id, err := json.Marshal(t.store.CreateTask(task.Text, task.Tags, task.Due))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -32,8 +48,8 @@ func (ss *Handlers) PostTaskHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(id)
 }
 
-func (ss *Handlers) GetAllTasksHandler(w http.ResponseWriter, r *http.Request) {
-	tasks := ss.store.GetAllTasks()
+func (t *taskHandlers) GetAllTasksHandler(w http.ResponseWriter, r *http.Request) {
+	tasks := t.store.GetAllTasks()
 
 	ts, err := json.Marshal(tasks)
 	if err != nil {
@@ -45,15 +61,15 @@ func (ss *Handlers) GetAllTasksHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(ts)
 }
 
-func (ss *Handlers) DeleteAllTasksHandler(w http.ResponseWriter, r *http.Request) {
-	ss.store.DeleteAllTasks()
+func (t *taskHandlers) DeleteAllTasksHandler(w http.ResponseWriter, r *http.Request) {
+	t.store.DeleteAllTasks()
 
 	msg := []byte("all tasks deleted")
 	w.Write(msg)
 }
 
-func (ss *Handlers) GetTaskHandler(w http.ResponseWriter, r *http.Request, id int) {
-	task, err := ss.store.GetTask(id)
+func (t *taskHandlers) GetTaskHandler(w http.ResponseWriter, r *http.Request, id int) {
+	task, err := t.store.GetTask(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -68,8 +84,8 @@ func (ss *Handlers) GetTaskHandler(w http.ResponseWriter, r *http.Request, id in
 	w.Write(ts)
 }
 
-func (ss *Handlers) DeleteTaskHandler(w http.ResponseWriter, r *http.Request, id int) {
-	if err := ss.store.DeleteTask(id); err != nil {
+func (t *taskHandlers) DeleteTaskHandler(w http.ResponseWriter, r *http.Request, id int) {
+	if err := t.store.DeleteTask(id); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -78,7 +94,7 @@ func (ss *Handlers) DeleteTaskHandler(w http.ResponseWriter, r *http.Request, id
 	w.Write(str)
 }
 
-func (ss *Handlers) PatchTaskHandler(w http.ResponseWriter, r *http.Request, id int) {
+func (t *taskHandlers) PatchTaskHandler(w http.ResponseWriter, r *http.Request, id int) {
 	var task storage.Task
 
 	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
@@ -86,7 +102,7 @@ func (ss *Handlers) PatchTaskHandler(w http.ResponseWriter, r *http.Request, id 
 		return
 	}
 
-	if err := ss.store.PatchTask(id, task.Text, task.Tags, task.Due, task.Completed); err != nil {
+	if err := t.store.PatchTask(id, task.Text, task.Tags, task.Due, task.Completed); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -95,7 +111,7 @@ func (ss *Handlers) PatchTaskHandler(w http.ResponseWriter, r *http.Request, id 
 	w.Write(str)
 }
 
-func (ss *Handlers) OptionsHandler(w http.ResponseWriter, r *http.Request) {
+func (t *taskHandlers) OptionsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.Header().Add("Access-Control-Allow-Methods", "GET,POST,DELETE,PATCH")
 	w.Header().Add("Access-Control-Allow-Headers", "*")
