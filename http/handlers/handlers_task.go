@@ -38,7 +38,7 @@ func (t *taskHandlers) PostTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Создание задачи
-	res, err := t.store.Create(dto.StorageRequest{
+	storageResp, err := t.store.Create(dto.StorageRequest{
 		Target: dto.RequestTargetAll,
 		Task:   task,
 	})
@@ -47,24 +47,24 @@ func (t *taskHandlers) PostTaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := json.Marshal(res.TaskId)
+	id, err := json.Marshal(storageResp.TaskId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	str := []byte("created new task with id = ")
-	w.Write(str)
+	resp := []byte("created new task with id = ")
+	w.Write(resp)
 	w.Write(id)
 }
 
 func (t *taskHandlers) GetAllTasksHandler(w http.ResponseWriter, r *http.Request) {
 	// Получение всех задач
-	tasks, _ := t.store.Read(dto.StorageRequest{
+	storageResp, _ := t.store.Read(dto.StorageRequest{
 		Target: dto.RequestTargetAll,
 	})
 
-	ts, err := json.Marshal(tasks)
+	ts, err := json.Marshal(storageResp.Tasks)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -86,7 +86,7 @@ func (t *taskHandlers) DeleteAllTasksHandler(w http.ResponseWriter, r *http.Requ
 
 func (t *taskHandlers) GetTaskHandler(w http.ResponseWriter, r *http.Request, id int) {
 	// Получение определенной задачи
-	task, err := t.store.Read(dto.StorageRequest{
+	storageResp, err := t.store.Read(dto.StorageRequest{
 		Target: dto.RequestTargetTask,
 		Task: dto.Task{
 			Id: id,
@@ -97,13 +97,13 @@ func (t *taskHandlers) GetTaskHandler(w http.ResponseWriter, r *http.Request, id
 		return
 	}
 
-	ts, err := json.Marshal(task)
+	resp, err := json.Marshal(storageResp.Task)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Write(ts)
+	w.Write(resp)
 }
 
 func (t *taskHandlers) DeleteTaskHandler(w http.ResponseWriter, r *http.Request, id int) {

@@ -30,13 +30,17 @@ func (d *dueHandlers) GetTasksByDueDateHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	tasks, err := d.store.Read(dto.StorageRequest{
+	storageResp, err := d.store.Read(dto.StorageRequest{
 		Task: dto.Task{
 			Due: date,
 		},
 	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-	resp, err := json.Marshal(tasks)
+	resp, err := json.Marshal(storageResp.Tasks)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

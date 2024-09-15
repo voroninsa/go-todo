@@ -27,7 +27,7 @@ func (t *tagHandlers) GetTasksByTagHandler(w http.ResponseWriter, r *http.Reques
 	tag := strings.Split(r.URL.Path, "/tag/")[1]
 
 	// Получение задач по тегу
-	tasks, err := t.store.Read(dto.StorageRequest{
+	storageResp, err := t.store.Read(dto.StorageRequest{
 		Tag: tag,
 	})
 	if err != nil {
@@ -35,7 +35,7 @@ func (t *tagHandlers) GetTasksByTagHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	resp, err := json.Marshal(tasks)
+	resp, err := json.Marshal(storageResp.Tasks)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
