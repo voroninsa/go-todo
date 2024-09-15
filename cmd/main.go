@@ -10,9 +10,9 @@ import (
 
 func main() {
 	logger := logger.NewLogger()
-	storage := storage.NewStorage()
 	flags := flags.ParseFlags()
 	congif := config.NewConfig(flags.ConfigPath, logger)
+	storage := storage.NewStorage(*congif)
 
 	serverParams := http.ServerParams{
 		Logger:  logger,

@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/voroninsa/go-todo/storage"
+	"github.com/voroninsa/go-todo/utils/dto"
 )
 
 type taskHandlersGetter interface {
@@ -20,24 +21,33 @@ type taskHandlersGetter interface {
 }
 
 type taskHandlers struct {
-	store *storage.TaskStore
+	store storage.Backend
 }
 
-func NewTaskHandlers(storage *storage.TaskStore) taskHandlersGetter {
+func NewTaskHandlers(storage storage.Backend) taskHandlersGetter {
 	return &taskHandlers{
 		store: storage,
 	}
 }
 
 func (t *taskHandlers) PostTaskHandler(w http.ResponseWriter, r *http.Request) {
-	var task storage.Task
-
+	var task dto.Task
 	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	id, err := json.Marshal(t.store.CreateTask(task.Text, task.Tags, task.Due))
+	// Создание задачи
+	res, err := t.store.Create(dto.StorageRequest{
+		Target: dto.RequestTargetAll,
+		Task:   task,
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	id, err := json.Marshal(res.TaskId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -49,7 +59,10 @@ func (t *taskHandlers) PostTaskHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *taskHandlers) GetAllTasksHandler(w http.ResponseWriter, r *http.Request) {
-	tasks := t.store.GetAllTasks()
+	// Получение всех задач
+	tasks, _ := t.store.Read(dto.StorageRequest{
+		Target: dto.RequestTargetAll,
+	})
 
 	ts, err := json.Marshal(tasks)
 	if err != nil {
@@ -57,19 +70,28 @@ func (t *taskHandlers) GetAllTasksHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	w.Header().Add("Origin", "*")
+	w.Header().Add("Content-Type", "application/json")
 	w.Write(ts)
 }
 
 func (t *taskHandlers) DeleteAllTasksHandler(w http.ResponseWriter, r *http.Request) {
-	t.store.DeleteAllTasks()
+	// Удаление всех задач
+	t.store.Delete(dto.StorageRequest{
+		Target: dto.RequestTargetAll,
+	})
 
 	msg := []byte("all tasks deleted")
 	w.Write(msg)
 }
 
 func (t *taskHandlers) GetTaskHandler(w http.ResponseWriter, r *http.Request, id int) {
-	task, err := t.store.GetTask(id)
+	// Получение определенной задачи
+	task, err := t.store.Read(dto.StorageRequest{
+		Target: dto.RequestTargetTask,
+		Task: dto.Task{
+			Id: id,
+		},
+	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -85,7 +107,13 @@ func (t *taskHandlers) GetTaskHandler(w http.ResponseWriter, r *http.Request, id
 }
 
 func (t *taskHandlers) DeleteTaskHandler(w http.ResponseWriter, r *http.Request, id int) {
-	if err := t.store.DeleteTask(id); err != nil {
+	// Удаление определенной задачи
+	err := t.store.Delete(dto.StorageRequest{
+		Task: dto.Task{
+			Id: id,
+		},
+	})
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -95,19 +123,24 @@ func (t *taskHandlers) DeleteTaskHandler(w http.ResponseWriter, r *http.Request,
 }
 
 func (t *taskHandlers) PatchTaskHandler(w http.ResponseWriter, r *http.Request, id int) {
-	var task storage.Task
-
+	var task dto.Task
 	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	task.Id = id
 
-	if err := t.store.PatchTask(id, task.Text, task.Tags, task.Due, task.Completed); err != nil {
+	// Обновление определенной задачи
+	err := t.store.Update(dto.StorageRequest{
+		Target: dto.RequestTargetTask,
+		Task:   task,
+	})
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	str := []byte(fmt.Sprintf("patched task with id = %d", id))
+	str := []byte(fmt.Sprintf("updated task with id = %d", id))
 	w.Write(str)
 }
 

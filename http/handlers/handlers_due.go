@@ -6,6 +6,7 @@ import (
 
 	"github.com/voroninsa/go-todo/storage"
 	"github.com/voroninsa/go-todo/utils/common"
+	"github.com/voroninsa/go-todo/utils/dto"
 )
 
 type dueHandlersGetter interface {
@@ -13,27 +14,33 @@ type dueHandlersGetter interface {
 }
 
 type dueHandlers struct {
-	store *storage.TaskStore
+	store storage.Backend
 }
 
-func NewDueHandlers(storage *storage.TaskStore) dueHandlersGetter {
+func NewDueHandlers(storage storage.Backend) dueHandlersGetter {
 	return &dueHandlers{
 		store: storage,
 	}
 }
 
-func (ss *dueHandlers) GetTasksByDueDateHandler(w http.ResponseWriter, r *http.Request) {
-	year, month, day, err := common.UrlToDate(r.URL.Path)
+func (d *dueHandlers) GetTasksByDueDateHandler(w http.ResponseWriter, r *http.Request) {
+	date, err := common.UrlToDate(r.URL.Path)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	tasks, err := json.Marshal(ss.store.GetTasksByDueDate(year, month, day))
+	tasks, err := d.store.Read(dto.StorageRequest{
+		Task: dto.Task{
+			Due: date,
+		},
+	})
+
+	resp, err := json.Marshal(tasks)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Write(tasks)
+	w.Write(resp)
 }

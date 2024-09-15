@@ -16,7 +16,7 @@ type Handlers struct {
 	*authHandlers
 }
 
-func NewHandlers(storage *storage.TaskStore) HandlersGetter {
+func NewHandlers(storage storage.Backend) HandlersGetter {
 	return &Handlers{
 		NewTaskHandlers(storage).(*taskHandlers),
 		NewTagHandlers(storage).(*tagHandlers),
