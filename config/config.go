@@ -10,8 +10,13 @@ import (
 )
 
 type Config struct {
+	// Server's port
 	Port int `json:"port"`
 
+	// Storage type (postgres, inmemory)
+	StorageType string `json:"storage_type"`
+
+	// Database's preferences
 	Db_Host string `json:"db_host"`
 	Db_Port int    `json:"db_port"`
 	Db_Name string `json:"db_name"`
@@ -44,5 +49,21 @@ func getConfig(configPath string) (*Config, error) {
 	var config Config
 	json.Unmarshal(byteValue, &config)
 
+	// Проверка типа хранилища
+	if err := storageTypeParser(config.StorageType); err != nil {
+		return nil, fmt.Errorf("storage type parser error: %w", err)
+	}
+
 	return &config, nil
+}
+
+func storageTypeParser(storageType string) error {
+	switch storageType {
+	case "postgres":
+		return nil
+	case "inmemory":
+		return nil
+	default:
+		return fmt.Errorf("unknown storage type: %s", storageType)
+	}
 }

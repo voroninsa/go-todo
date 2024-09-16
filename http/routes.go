@@ -9,10 +9,10 @@ import (
 )
 
 type routes struct {
-	handlers handlers.Handlers
+	handlers handlers.HandlersGetter
 }
 
-func NewRouter(handlers handlers.Handlers) *http.ServeMux {
+func NewRouter(handlers handlers.HandlersGetter) *http.ServeMux {
 	r := &routes{
 		handlers: handlers,
 	}

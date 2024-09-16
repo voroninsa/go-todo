@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func UrlToDate(date string) (int, time.Month, int, error) {
+func UrlToDate(date string) (time.Time, error) {
 	str := strings.Split(date, "/due/")[1]
 
 	number, err := strconv.Atoi(str)
@@ -17,7 +17,7 @@ func UrlToDate(date string) (int, time.Month, int, error) {
 		count += 1
 	}
 	if count != 8 || err != nil {
-		return 0, 0, 0, errors.New("incorrect date: date must be like YYYYMMDD")
+		return time.Time{}, errors.New("incorrect date: date must be like YYYYMMDD")
 	}
 
 	year, _ := strconv.Atoi(str[:4])
@@ -25,11 +25,14 @@ func UrlToDate(date string) (int, time.Month, int, error) {
 	day, _ := strconv.Atoi(str[6:8])
 
 	if day > 31 {
-		return 0, 0, 0, errors.New("incorrect date: the day should not be more than 31")
+		return time.Time{}, errors.New("incorrect date: the day should not be more than 31")
 	}
 	if month < int(time.January) || month > int(time.December) {
-		return 0, 0, 0, errors.New("incorrect date: month entered incorrectly")
+		return time.Time{}, errors.New("incorrect date: month entered incorrectly")
 	}
 
-	return year, time.Month(month), day, nil
+	var resDate time.Time
+	resDate = resDate.AddDate(year-1, month-1, day-1)
+
+	return resDate, nil
 }
