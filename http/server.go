@@ -23,13 +23,13 @@ type serverImpl struct {
 }
 
 type ServerParams struct {
-	Storage storage.Backend
+	Storage *storage.Backend
 	Config  *config.Config
 	Logger  *zap.Logger
 }
 
 func NewServer(params ServerParams) ServerRunner {
-	handlers := handlers.NewHandlers(params.Storage)
+	handlers := handlers.NewHandlers(*params.Storage)
 	mux := NewRouter(handlers)
 	return &serverImpl{
 		mux:    mux,

@@ -12,6 +12,7 @@ const (
 )
 
 func (ts *TaskStore) createTask(task dto.Task) int {
+	task.Id = ts.nextId
 	ts.tasks[ts.nextId] = task
 	ts.nextId++
 
@@ -62,7 +63,7 @@ func (ts *TaskStore) readAllTasks() []dto.Task {
 }
 
 func (ts *TaskStore) readTasksByTag(tag string) []dto.Task {
-	var tasks []dto.Task
+	tasks := make([]dto.Task, 0)
 
 taskloop:
 	for _, task := range ts.tasks {
@@ -78,7 +79,7 @@ taskloop:
 }
 
 func (ts *TaskStore) readTasksByDueDate(date time.Time) []dto.Task {
-	var tasks []dto.Task
+	tasks := make([]dto.Task, 0)
 
 	for _, task := range ts.tasks {
 		if task.Due == date {

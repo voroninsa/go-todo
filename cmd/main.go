@@ -16,7 +16,7 @@ func main() {
 
 	serverParams := http.ServerParams{
 		Logger:  logger,
-		Storage: storage,
+		Storage: &storage,
 		Config:  congif,
 	}
 	server := http.NewServer(serverParams)

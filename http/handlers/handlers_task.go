@@ -33,7 +33,7 @@ func NewTaskHandlers(storage storage.Backend) taskHandlersGetter {
 func (t *taskHandlers) PostTaskHandler(w http.ResponseWriter, r *http.Request) {
 	var task dto.Task
 	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -93,7 +93,7 @@ func (t *taskHandlers) GetTaskHandler(w http.ResponseWriter, r *http.Request, id
 		},
 	})
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -109,6 +109,7 @@ func (t *taskHandlers) GetTaskHandler(w http.ResponseWriter, r *http.Request, id
 func (t *taskHandlers) DeleteTaskHandler(w http.ResponseWriter, r *http.Request, id int) {
 	// Удаление определенной задачи
 	err := t.store.Delete(dto.StorageRequest{
+		Target: dto.RequestTargetTask,
 		Task: dto.Task{
 			Id: id,
 		},

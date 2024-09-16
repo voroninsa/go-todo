@@ -28,7 +28,8 @@ func (t *tagHandlers) GetTasksByTagHandler(w http.ResponseWriter, r *http.Reques
 
 	// Получение задач по тегу
 	storageResp, err := t.store.Read(dto.StorageRequest{
-		Tag: tag,
+		Target: dto.RequestTargetTag,
+		Tag:    tag,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
