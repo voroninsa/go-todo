@@ -12,7 +12,7 @@ func main() {
 	logger := logger.NewLogger()
 	flags := flags.ParseFlags()
 	congif := config.NewConfig(flags.ConfigPath, logger)
-	storage := storage.NewStorage(*congif)
+	storage := storage.NewStorage(congif, logger)
 
 	serverParams := http.ServerParams{
 		Logger:  logger,

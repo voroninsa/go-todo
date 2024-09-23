@@ -11,7 +11,7 @@ const (
 	errTaskNotFound = "task with id = %d not found"
 )
 
-func (ts *TaskStore) createTask(task dto.Task) int {
+func (ts *taskStore) createTask(task dto.Task) int {
 	task.Id = ts.nextId
 	ts.tasks[ts.nextId] = task
 	ts.nextId++
@@ -19,7 +19,7 @@ func (ts *TaskStore) createTask(task dto.Task) int {
 	return task.Id
 }
 
-func (ts *TaskStore) readTask(id int) (dto.Task, error) {
+func (ts *taskStore) readTask(id int) (dto.Task, error) {
 	task, ok := ts.tasks[id]
 	if !ok {
 		return dto.Task{}, fmt.Errorf(errTaskNotFound, id)
@@ -28,7 +28,7 @@ func (ts *TaskStore) readTask(id int) (dto.Task, error) {
 	return task, nil
 }
 
-func (ts *TaskStore) updateTask(task dto.Task) error {
+func (ts *taskStore) updateTask(task dto.Task) error {
 	if ts.tasks[task.Id].Id == 0 {
 		return fmt.Errorf(errTaskNotFound, task.Id)
 	}
@@ -38,7 +38,7 @@ func (ts *TaskStore) updateTask(task dto.Task) error {
 	return nil
 }
 
-func (ts *TaskStore) deleteTask(id int) error {
+func (ts *taskStore) deleteTask(id int) error {
 	if _, ok := ts.tasks[id]; !ok {
 		return fmt.Errorf(errTaskNotFound, id)
 	}
@@ -48,11 +48,11 @@ func (ts *TaskStore) deleteTask(id int) error {
 	return nil
 }
 
-func (ts *TaskStore) deleteAllTasks() {
+func (ts *taskStore) deleteAllTasks() {
 	ts.tasks = make(map[int]dto.Task)
 }
 
-func (ts *TaskStore) readAllTasks() []dto.Task {
+func (ts *taskStore) readAllTasks() []dto.Task {
 	allTasks := make([]dto.Task, 0, len(ts.tasks))
 
 	for _, task := range ts.tasks {
@@ -62,7 +62,7 @@ func (ts *TaskStore) readAllTasks() []dto.Task {
 	return allTasks
 }
 
-func (ts *TaskStore) readTasksByTag(tag string) []dto.Task {
+func (ts *taskStore) readTasksByTag(tag string) []dto.Task {
 	tasks := make([]dto.Task, 0)
 
 taskloop:
@@ -78,7 +78,7 @@ taskloop:
 	return tasks
 }
 
-func (ts *TaskStore) readTasksByDueDate(date time.Time) []dto.Task {
+func (ts *taskStore) readTasksByDueDate(date time.Time) []dto.Task {
 	tasks := make([]dto.Task, 0)
 
 	for _, task := range ts.tasks {

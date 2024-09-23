@@ -11,15 +11,15 @@ var (
 	errIncorrectRequest = errors.New("incorrect request target")
 )
 
-type TaskStore struct {
+type taskStore struct {
 	sync.Mutex
 
 	tasks  map[int]dto.Task
 	nextId int
 }
 
-func NewInMemStorage() *TaskStore {
-	ts := &TaskStore{
+func NewInMemStorage() *taskStore {
+	ts := &taskStore{
 		tasks:  make(map[int]dto.Task),
 		nextId: 1,
 	}
@@ -27,7 +27,7 @@ func NewInMemStorage() *TaskStore {
 	return ts
 }
 
-func (ts *TaskStore) Create(req dto.StorageRequest) (*dto.StorageResponse, error) {
+func (ts *taskStore) Create(req dto.StorageRequest) (*dto.StorageResponse, error) {
 	ts.Lock()
 	defer ts.Unlock()
 
@@ -45,7 +45,7 @@ func (ts *TaskStore) Create(req dto.StorageRequest) (*dto.StorageResponse, error
 	}
 }
 
-func (ts *TaskStore) Read(req dto.StorageRequest) (*dto.StorageResponse, error) {
+func (ts *taskStore) Read(req dto.StorageRequest) (*dto.StorageResponse, error) {
 	ts.Lock()
 	defer ts.Unlock()
 
@@ -90,7 +90,7 @@ func (ts *TaskStore) Read(req dto.StorageRequest) (*dto.StorageResponse, error) 
 	}
 }
 
-func (ts *TaskStore) Update(req dto.StorageRequest) error {
+func (ts *taskStore) Update(req dto.StorageRequest) error {
 	ts.Lock()
 	defer ts.Unlock()
 
@@ -109,7 +109,7 @@ func (ts *TaskStore) Update(req dto.StorageRequest) error {
 	}
 }
 
-func (ts *TaskStore) Delete(req dto.StorageRequest) error {
+func (ts *taskStore) Delete(req dto.StorageRequest) error {
 	ts.Lock()
 	defer ts.Unlock()
 
