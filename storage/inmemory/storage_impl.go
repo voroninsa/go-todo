@@ -16,6 +16,9 @@ func (ts *taskStore) CreateTask(task *dto.Task) (int, error) {
 	defer ts.Unlock()
 
 	task.Id = ts.nextId
+	task.Created_at = time.Now()
+	task.Updated_at = time.Now()
+
 	ts.tasks[ts.nextId] = *task
 	ts.nextId++
 
@@ -41,6 +44,8 @@ func (ts *taskStore) UpdateTask(task *dto.Task) error {
 	if ts.tasks[task.Id].Id == 0 {
 		return fmt.Errorf(errTaskNotFound, task.Id)
 	}
+
+	task.Updated_at = time.Now()
 
 	ts.tasks[task.Id] = *task
 
