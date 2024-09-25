@@ -11,13 +11,13 @@ import (
 func main() {
 	logger := logger.NewLogger()
 	flags := flags.ParseFlags()
-	congif := config.NewConfig(flags.ConfigPath, logger)
-	storage := storage.NewStorage(congif, logger)
+	config := config.NewConfig(flags.ConfigPath, logger)
+	storage := storage.BackendFactory(config, logger)
 
 	serverParams := http.ServerParams{
 		Logger:  logger,
 		Storage: &storage,
-		Config:  congif,
+		Config:  config,
 	}
 	server := http.NewServer(serverParams)
 	server.Run()

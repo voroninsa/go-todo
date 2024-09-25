@@ -11,34 +11,46 @@ const (
 	errTaskNotFound = "task with id = %d not found"
 )
 
-func (ts *taskStore) createTask(task dto.Task) int {
+func (ts *taskStore) CreateTask(task *dto.Task) (int, error) {
+	ts.Lock()
+	defer ts.Unlock()
+
 	task.Id = ts.nextId
-	ts.tasks[ts.nextId] = task
+	ts.tasks[ts.nextId] = *task
 	ts.nextId++
 
-	return task.Id
+	return task.Id, nil
 }
 
-func (ts *taskStore) readTask(id int) (dto.Task, error) {
+func (ts *taskStore) ReadTask(id int) (*dto.Task, error) {
+	ts.Lock()
+	defer ts.Unlock()
+
 	task, ok := ts.tasks[id]
 	if !ok {
-		return dto.Task{}, fmt.Errorf(errTaskNotFound, id)
+		return &dto.Task{}, fmt.Errorf(errTaskNotFound, id)
 	}
 
-	return task, nil
+	return &task, nil
 }
 
-func (ts *taskStore) updateTask(task dto.Task) error {
+func (ts *taskStore) UpdateTask(task *dto.Task) error {
+	ts.Lock()
+	defer ts.Unlock()
+
 	if ts.tasks[task.Id].Id == 0 {
 		return fmt.Errorf(errTaskNotFound, task.Id)
 	}
 
-	ts.tasks[task.Id] = task
+	ts.tasks[task.Id] = *task
 
 	return nil
 }
 
-func (ts *taskStore) deleteTask(id int) error {
+func (ts *taskStore) DeleteTask(id int) error {
+	ts.Lock()
+	defer ts.Unlock()
+
 	if _, ok := ts.tasks[id]; !ok {
 		return fmt.Errorf(errTaskNotFound, id)
 	}
@@ -48,21 +60,32 @@ func (ts *taskStore) deleteTask(id int) error {
 	return nil
 }
 
-func (ts *taskStore) deleteAllTasks() {
+func (ts *taskStore) DeleteAllTasks() error {
+	ts.Lock()
+	defer ts.Unlock()
+
 	ts.tasks = make(map[int]dto.Task)
+
+	return nil
 }
 
-func (ts *taskStore) readAllTasks() []dto.Task {
+func (ts *taskStore) ReadAllTasks() ([]dto.Task, error) {
+	ts.Lock()
+	defer ts.Unlock()
+
 	allTasks := make([]dto.Task, 0, len(ts.tasks))
 
 	for _, task := range ts.tasks {
 		allTasks = append(allTasks, task)
 	}
 
-	return allTasks
+	return allTasks, nil
 }
 
-func (ts *taskStore) readTasksByTag(tag string) []dto.Task {
+func (ts *taskStore) ReadTasksByTag(tag string) ([]dto.Task, error) {
+	ts.Lock()
+	defer ts.Unlock()
+
 	tasks := make([]dto.Task, 0)
 
 taskloop:
@@ -75,17 +98,20 @@ taskloop:
 		}
 	}
 
-	return tasks
+	return tasks, nil
 }
 
-func (ts *taskStore) readTasksByDueDate(date time.Time) []dto.Task {
+func (ts *taskStore) ReadTasksByDueDate(date time.Time) ([]dto.Task, error) {
+	ts.Lock()
+	defer ts.Unlock()
+
 	tasks := make([]dto.Task, 0)
 
 	for _, task := range ts.tasks {
-		if task.Due == date {
+		if task.Deadline == date {
 			tasks = append(tasks, task)
 		}
 	}
 
-	return tasks
+	return tasks, nil
 }

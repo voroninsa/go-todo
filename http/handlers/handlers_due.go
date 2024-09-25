@@ -33,7 +33,7 @@ func (d *dueHandlers) GetTasksByDueDateHandler(w http.ResponseWriter, r *http.Re
 	storageResp, err := d.store.Read(dto.StorageRequest{
 		Target: dto.RequestTargetDueDate,
 		Task: dto.Task{
-			Due: date,
+			Deadline: date,
 		},
 	})
 	if err != nil {

@@ -6,7 +6,6 @@ import (
 
 	_ "github.com/lib/pq"
 	"github.com/voroninsa/go-todo/config"
-	"github.com/voroninsa/go-todo/utils/dto"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -25,20 +24,4 @@ func NewPostgresStorage(c *config.Config, logger *zap.Logger) *postgresStorage {
 	return &postgresStorage{
 		StorageURL: db,
 	}
-}
-
-func (p *postgresStorage) Create(dto.StorageRequest) (*dto.StorageResponse, error) {
-	return nil, nil
-}
-
-func (p *postgresStorage) Read(dto.StorageRequest) (*dto.StorageResponse, error) {
-	return nil, nil
-}
-
-func (p *postgresStorage) Update(dto.StorageRequest) error {
-	return nil
-}
-
-func (p *postgresStorage) Delete(dto.StorageRequest) error {
-	return nil
 }
