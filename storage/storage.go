@@ -95,7 +95,7 @@ func (ts *backendStorage) Read(req dto.StorageRequest) (*dto.StorageResponse, er
 
 	// Задачи по дате
 	case dto.RequestTargetDueDate:
-		tasks, err := ts.storage.ReadTasksByDueDate(req.Task.Deadline)
+		tasks, err := ts.storage.ReadTasksByDeadline(req.Task.Deadline)
 		if err != nil {
 			return nil, err
 		}

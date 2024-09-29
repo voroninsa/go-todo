@@ -42,6 +42,7 @@ func ErrorDatabase(err error) error {
 	return fmt.Errorf("error database: %w", err)
 }
 
+// Переводит слайс строк в формат "(tag1,tag2,tag3)"
 func TagsToSqlQueryString(tags []string) string {
 	res := "("
 	for _, tag := range tags {

@@ -12,5 +12,5 @@ type StorageMoves interface {
 	DeleteAllTasks() error
 	ReadAllTasks() ([]Task, error)
 	ReadTasksByTag(tag string) ([]Task, error)
-	ReadTasksByDueDate(date time.Time) ([]Task, error)
+	ReadTasksByDeadline(date time.Time) ([]Task, error)
 }

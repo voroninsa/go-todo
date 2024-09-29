@@ -106,7 +106,7 @@ taskloop:
 	return tasks, nil
 }
 
-func (ts *taskStore) ReadTasksByDueDate(date time.Time) ([]dto.Task, error) {
+func (ts *taskStore) ReadTasksByDeadline(date time.Time) ([]dto.Task, error) {
 	ts.Lock()
 	defer ts.Unlock()
 

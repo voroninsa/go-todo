@@ -7,7 +7,8 @@ const (
 	RETURNING task_id;
 `
 	queryReadTask = `
-	SELECT * FROM Tasks WHERE id = $1;
+	SELECT * FROM Tasks 
+	WHERE id = $1;
 `
 	queryUpdateTask = `
 	UPDATE Tasks
@@ -16,5 +17,20 @@ const (
 `
 	queryReadAllTask = `
 	SELECT * FROM Tasks;
+`
+	queryDeleteTask = `
+	DELETE FROM Tasks 
+	WHERE id = $1;
+`
+	queryDeleteAllTasks = `
+	DELETE FROM Tasks;
+`
+	queryReadTasksByTags = `
+	SELECT * FROM Tasks 
+	WHERE $1 = ANY(tags);
+`
+	queryReadTasksByDeadline = `	
+	SELECT * FROM Tasks 
+	WHERE date = $1;
 `
 )
