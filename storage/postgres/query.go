@@ -7,11 +7,12 @@ const (
 	RETURNING task_id;
 `
 	queryReadTask = `
-	SELECT * FROM Tasks 
+	SELECT * FROM Tasks
 	WHERE task_id = $1;
 `
 	queryReadAllTask = `
-	SELECT * FROM Tasks;
+	SELECT * FROM Tasks
+	ORDER BY task_id ASC;
 `
 	queryUpdateTask = `
 	UPDATE Tasks
@@ -19,18 +20,20 @@ const (
 	WHERE task_id = $5;
 `
 	queryDeleteTask = `
-	DELETE FROM Tasks 
+	DELETE FROM Tasks
 	WHERE task_id = $1;
 `
 	queryDeleteAllTasks = `
 	DELETE FROM Tasks;
 `
 	queryReadTasksByTags = `
-	SELECT * FROM Tasks 
-	WHERE $1 = ANY(tags);
+	SELECT * FROM Tasks
+	WHERE $1 = ANY(tags)
+	ORDER BY task_id ASC;
 `
 	queryReadTasksByDeadline = `	
-	SELECT * FROM Tasks 
-	WHERE deadline = $1;
+	SELECT * FROM Tasks
+	WHERE deadline = $1
+	ORDER BY task_id ASC;
 `
 )

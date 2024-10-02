@@ -3,6 +3,7 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/voroninsa/go-todo/utils/common"
@@ -43,21 +44,10 @@ func (s *postgresStorage) ReadTask(id int) (*dto.Task, error) {
 	// Запрос на создание задачи в базу данных
 	row := s.StorageURL.QueryRow(queryReadTask, id)
 
-	// Переменная для хранения возвращенного id
-	var task dto.Task
-
-	// Сканирование результата в структуру
-	err := row.Scan(
-		&task.Id,
-		&task.Description,
-		&task.Tags,
-		&task.Deadline,
-		&task.Created_at,
-		&task.Updated_at,
-		&task.Completed,
-	)
+	// Перебираем задачи из ответа базы данных
+	task, err := taskEnumeration(row)
 	if err != nil {
-		return nil, fmt.Errorf("reading task error: %w", err)
+		return nil, err
 	}
 
 	return &task, nil
@@ -194,10 +184,12 @@ func taskSliceEnumeration(rows *sql.Rows) ([]dto.Task, error) {
 	// Перебираем задачи из ответа базы данных
 	for rows.Next() {
 		var task dto.Task
+		var bytesTags []uint8
+
 		err := rows.Scan(
 			&task.Id,
 			&task.Description,
-			&task.Tags,
+			&bytesTags,
 			&task.Deadline,
 			&task.Created_at,
 			&task.Updated_at,
@@ -206,8 +198,50 @@ func taskSliceEnumeration(rows *sql.Rows) ([]dto.Task, error) {
 		if err != nil {
 			return nil, fmt.Errorf("reading task by tag in tasks rows error: %w", err)
 		}
+
+		// Преобразуем битовый слайс []uint8 из бд в строку
+		tagsStr := string(bytesTags)
+
+		// Удаляем фигурные скобки и разделяем строку по запятым
+		tagsStr = strings.Trim(tagsStr, "{}")
+		tagsList := strings.Split(tagsStr, ",")
+
+		task.Tags = tagsList
+
 		tasks = append(tasks, task)
 	}
 
 	return tasks, nil
+}
+
+func taskEnumeration(rows *sql.Row) (dto.Task, error) {
+	// Переменная для хранения возвращенных задач
+	var task dto.Task
+
+	// Перебираем задачу из ответа базы данных
+	var bytesTags []uint8
+
+	err := rows.Scan(
+		&task.Id,
+		&task.Description,
+		&bytesTags,
+		&task.Deadline,
+		&task.Created_at,
+		&task.Updated_at,
+		&task.Completed,
+	)
+	if err != nil {
+		return dto.Task{}, fmt.Errorf("reading task by tag in tasks rows error: %w", err)
+	}
+
+	// Преобразуем битовый слайс []uint8 из бд в строку
+	tagsStr := string(bytesTags)
+
+	// Удаляем фигурные скобки и разделяем строку по запятым
+	tagsStr = strings.Trim(tagsStr, "{}")
+	tagsList := strings.Split(tagsStr, ",")
+
+	task.Tags = tagsList
+
+	return task, nil
 }
