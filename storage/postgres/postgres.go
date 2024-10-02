@@ -12,6 +12,9 @@ import (
 
 type postgresStorage struct {
 	StorageURL *sql.DB
+
+	// Счетчик количества записей в таблице
+	rowCount int
 }
 
 func NewPostgresStorage(c *config.Config, logger *zap.Logger) *postgresStorage {

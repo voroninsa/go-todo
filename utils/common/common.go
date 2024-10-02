@@ -44,12 +44,12 @@ func ErrorDatabase(err error) error {
 
 // Переводит слайс строк в формат "(tag1,tag2,tag3)"
 func TagsToSqlQueryString(tags []string) string {
-	res := "("
+	res := "{"
 	for _, tag := range tags {
-		res += fmt.Sprintf("'%s',", tag)
+		res += fmt.Sprintf(`"%s",`, tag)
 	}
 	res = res[:len(res)-1]
-	res += ")"
+	res += "}"
 
 	return res
 }

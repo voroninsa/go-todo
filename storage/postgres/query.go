@@ -8,19 +8,19 @@ const (
 `
 	queryReadTask = `
 	SELECT * FROM Tasks 
-	WHERE id = $1;
+	WHERE task_id = $1;
+`
+	queryReadAllTask = `
+	SELECT * FROM Tasks;
 `
 	queryUpdateTask = `
 	UPDATE Tasks
 	SET description = $1, tags = $2, deadline = $3, updated_at = NOW(), completed = $4
 	WHERE task_id = $5;
 `
-	queryReadAllTask = `
-	SELECT * FROM Tasks;
-`
 	queryDeleteTask = `
 	DELETE FROM Tasks 
-	WHERE id = $1;
+	WHERE task_id = $1;
 `
 	queryDeleteAllTasks = `
 	DELETE FROM Tasks;
@@ -31,6 +31,6 @@ const (
 `
 	queryReadTasksByDeadline = `	
 	SELECT * FROM Tasks 
-	WHERE date = $1;
+	WHERE deadline = $1;
 `
 )

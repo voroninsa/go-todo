@@ -8,6 +8,7 @@ import (
 
 	"github.com/voroninsa/go-todo/storage"
 	"github.com/voroninsa/go-todo/utils/dto"
+	"go.uber.org/zap"
 )
 
 type taskHandlersGetter interface {
@@ -21,19 +22,24 @@ type taskHandlersGetter interface {
 }
 
 type taskHandlers struct {
-	store storage.Backend
+	store  storage.Backend
+	logger *zap.Logger
 }
 
-func NewTaskHandlers(storage storage.Backend) taskHandlersGetter {
+func NewTaskHandlers(storage storage.Backend, logger *zap.Logger) taskHandlersGetter {
+	log := logger.Named("handlers_task")
+
 	return &taskHandlers{
-		store: storage,
+		store:  storage,
+		logger: log,
 	}
 }
 
 func (t *taskHandlers) PostTaskHandler(w http.ResponseWriter, r *http.Request) {
 	var task dto.Task
 	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		t.logger.Error(err.Error())
+		http.Error(w, errUnexpectedError, http.StatusBadRequest)
 		return
 	}
 
@@ -43,13 +49,15 @@ func (t *taskHandlers) PostTaskHandler(w http.ResponseWriter, r *http.Request) {
 		Task:   task,
 	})
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		t.logger.Error(err.Error())
+		http.Error(w, errUnexpectedError, http.StatusInternalServerError)
 		return
 	}
 
 	id, err := json.Marshal(storageResp.TaskId)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		t.logger.Error(err.Error())
+		http.Error(w, errUnexpectedError, http.StatusInternalServerError)
 		return
 	}
 
@@ -60,13 +68,19 @@ func (t *taskHandlers) PostTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 func (t *taskHandlers) GetAllTasksHandler(w http.ResponseWriter, r *http.Request) {
 	// Получение всех задач
-	storageResp, _ := t.store.Read(dto.StorageRequest{
+	storageResp, err := t.store.Read(dto.StorageRequest{
 		Target: dto.RequestTargetAll,
 	})
+	if err != nil {
+		t.logger.Error(err.Error())
+		http.Error(w, errUnexpectedError, http.StatusInternalServerError)
+		return
+	}
 
 	ts, err := json.Marshal(storageResp.Tasks)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		t.logger.Error(err.Error())
+		http.Error(w, errUnexpectedError, http.StatusInternalServerError)
 		return
 	}
 
@@ -76,9 +90,14 @@ func (t *taskHandlers) GetAllTasksHandler(w http.ResponseWriter, r *http.Request
 
 func (t *taskHandlers) DeleteAllTasksHandler(w http.ResponseWriter, r *http.Request) {
 	// Удаление всех задач
-	t.store.Delete(dto.StorageRequest{
+	err := t.store.Delete(dto.StorageRequest{
 		Target: dto.RequestTargetAll,
 	})
+	if err != nil {
+		t.logger.Error(err.Error())
+		http.Error(w, errUnexpectedError, http.StatusInternalServerError)
+		return
+	}
 
 	msg := []byte("all tasks deleted")
 	w.Write(msg)
@@ -93,13 +112,15 @@ func (t *taskHandlers) GetTaskHandler(w http.ResponseWriter, r *http.Request, id
 		},
 	})
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		t.logger.Error(err.Error())
+		http.Error(w, errUnexpectedError, http.StatusInternalServerError)
 		return
 	}
 
 	resp, err := json.Marshal(storageResp.Task)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		t.logger.Error(err.Error())
+		http.Error(w, errUnexpectedError, http.StatusInternalServerError)
 		return
 	}
 
@@ -115,7 +136,8 @@ func (t *taskHandlers) DeleteTaskHandler(w http.ResponseWriter, r *http.Request,
 		},
 	})
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		t.logger.Error(err.Error())
+		http.Error(w, errUnexpectedError, http.StatusInternalServerError)
 		return
 	}
 
@@ -126,7 +148,8 @@ func (t *taskHandlers) DeleteTaskHandler(w http.ResponseWriter, r *http.Request,
 func (t *taskHandlers) PatchTaskHandler(w http.ResponseWriter, r *http.Request, id int) {
 	var task dto.Task
 	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		t.logger.Error(err.Error())
+		http.Error(w, errUnexpectedError, http.StatusInternalServerError)
 		return
 	}
 	task.Id = id
@@ -137,7 +160,8 @@ func (t *taskHandlers) PatchTaskHandler(w http.ResponseWriter, r *http.Request, 
 		Task:   task,
 	})
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		t.logger.Error(err.Error())
+		http.Error(w, errUnexpectedError, http.StatusInternalServerError)
 		return
 	}
 

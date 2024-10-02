@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -23,9 +24,11 @@ func (s *postgresStorage) CreateTask(task *dto.Task) (int, error) {
 
 	// Запрос на создание задачи в базу данных
 	err := s.StorageURL.QueryRow(queryCreateTask, task.Description, tagsStr, task.Deadline).Scan(&taskID)
-	if err != nil {
+	if err == sql.ErrNoRows {
 		return 0, fmt.Errorf("creating task error: %w", err)
 	}
+
+	s.rowCount++
 
 	return taskID, nil
 }
@@ -37,11 +40,22 @@ func (s *postgresStorage) ReadTask(id int) (*dto.Task, error) {
 		return nil, common.ErrorDatabase(err)
 	}
 
+	// Запрос на создание задачи в базу данных
+	row := s.StorageURL.QueryRow(queryReadTask, id)
+
 	// Переменная для хранения возвращенного id
 	var task dto.Task
 
-	// Запрос на создание задачи в базу данных
-	err := s.StorageURL.QueryRow(queryReadTask, id).Scan(&task)
+	// Сканирование результата в структуру
+	err := row.Scan(
+		&task.Id,
+		&task.Description,
+		&task.Tags,
+		&task.Deadline,
+		&task.Created_at,
+		&task.Updated_at,
+		&task.Completed,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("reading task error: %w", err)
 	}
@@ -81,6 +95,8 @@ func (s *postgresStorage) DeleteTask(id int) error {
 		return fmt.Errorf("deleting task error: %w", err)
 	}
 
+	s.rowCount--
+
 	return nil
 }
 
@@ -97,6 +113,9 @@ func (s *postgresStorage) DeleteAllTasks() error {
 		return fmt.Errorf("deleting all tasks error: %w", err)
 	}
 
+	// TODO: Когда внедрю аутентификацию, переделать
+	s.rowCount = 0
+
 	return nil
 }
 
@@ -107,13 +126,17 @@ func (s *postgresStorage) ReadAllTasks() ([]dto.Task, error) {
 		return nil, common.ErrorDatabase(err)
 	}
 
-	// Переменная для хранения возвращенных задач
-	var tasks []dto.Task
-
 	// Запрос на получение всех задач в базу данных
-	err := s.StorageURL.QueryRow(queryReadAllTask).Scan(&tasks)
+	rows, err := s.StorageURL.Query(queryReadAllTask)
 	if err != nil {
 		return nil, fmt.Errorf("reading all tasks error: %w", err)
+	}
+	defer rows.Close()
+
+	// Перебираем задачи из ответа базы данных
+	tasks, err := taskSliceEnumeration(rows)
+	if err != nil {
+		return nil, err
 	}
 
 	return tasks, nil
@@ -126,13 +149,17 @@ func (s *postgresStorage) ReadTasksByTag(tag string) ([]dto.Task, error) {
 		return nil, common.ErrorDatabase(err)
 	}
 
-	// Переменная для хранения возвращенных задач
-	var tasks []dto.Task
-
 	// Запрос на получение всех задач с определенным тегом
-	err := s.StorageURL.QueryRow(queryReadTasksByTags, tag).Scan(&tasks)
+	rows, err := s.StorageURL.Query(queryReadTasksByTags, tag)
 	if err != nil {
 		return nil, fmt.Errorf("reading task by tag error: %w", err)
+	}
+	defer rows.Close()
+
+	// Перебираем задачи из ответа базы данных
+	tasks, err := taskSliceEnumeration(rows)
+	if err != nil {
+		return nil, err
 	}
 
 	return tasks, nil
@@ -145,13 +172,41 @@ func (s *postgresStorage) ReadTasksByDeadline(date time.Time) ([]dto.Task, error
 		return nil, common.ErrorDatabase(err)
 	}
 
+	// Запрос на получение всех задач с определенным дедлайном
+	rows, err := s.StorageURL.Query(queryReadTasksByDeadline, date)
+	if err != nil {
+		return nil, fmt.Errorf("reading task by deadline error: %w", err)
+	}
+
+	// Перебираем задачи из ответа базы данных
+	tasks, err := taskSliceEnumeration(rows)
+	if err != nil {
+		return nil, err
+	}
+
+	return tasks, nil
+}
+
+func taskSliceEnumeration(rows *sql.Rows) ([]dto.Task, error) {
 	// Переменная для хранения возвращенных задач
 	var tasks []dto.Task
 
-	// Запрос на получение всех задач с определенным дедлайном
-	err := s.StorageURL.QueryRow(queryReadTasksByDeadline, date).Scan(&tasks)
-	if err != nil {
-		return nil, fmt.Errorf("reading task by deadline error: %w", err)
+	// Перебираем задачи из ответа базы данных
+	for rows.Next() {
+		var task dto.Task
+		err := rows.Scan(
+			&task.Id,
+			&task.Description,
+			&task.Tags,
+			&task.Deadline,
+			&task.Created_at,
+			&task.Updated_at,
+			&task.Completed,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("reading task by tag in tasks rows error: %w", err)
+		}
+		tasks = append(tasks, task)
 	}
 
 	return tasks, nil

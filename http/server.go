@@ -29,7 +29,7 @@ type ServerParams struct {
 }
 
 func NewServer(params ServerParams) ServerRunner {
-	handlers := handlers.NewHandlers(*params.Storage)
+	handlers := handlers.NewHandlers(*params.Storage, params.Logger)
 	mux := NewRouter(handlers)
 	return &serverImpl{
 		mux:    mux,

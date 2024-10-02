@@ -1,6 +1,13 @@
 package handlers
 
-import "github.com/voroninsa/go-todo/storage"
+import (
+	"github.com/voroninsa/go-todo/storage"
+	"go.uber.org/zap"
+)
+
+const (
+	errUnexpectedError = "unexpected error"
+)
 
 type HandlersGetter interface {
 	taskHandlersGetter
@@ -16,11 +23,11 @@ type Handlers struct {
 	*authHandlers
 }
 
-func NewHandlers(storage storage.Backend) HandlersGetter {
+func NewHandlers(storage storage.Backend, logger *zap.Logger) HandlersGetter {
 	return &Handlers{
-		NewTaskHandlers(storage).(*taskHandlers),
-		NewTagHandlers(storage).(*tagHandlers),
-		NewDueHandlers(storage).(*dueHandlers),
-		NewAuthHandlers(storage).(*authHandlers),
+		NewTaskHandlers(storage, logger).(*taskHandlers),
+		NewTagHandlers(storage, logger).(*tagHandlers),
+		NewDueHandlers(storage, logger).(*dueHandlers),
+		NewAuthHandlers(storage, logger).(*authHandlers),
 	}
 }

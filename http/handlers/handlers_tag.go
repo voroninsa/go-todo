@@ -7,6 +7,7 @@ import (
 
 	"github.com/voroninsa/go-todo/storage"
 	"github.com/voroninsa/go-todo/utils/dto"
+	"go.uber.org/zap"
 )
 
 type tagHandlersGetter interface {
@@ -14,12 +15,16 @@ type tagHandlersGetter interface {
 }
 
 type tagHandlers struct {
-	store storage.Backend
+	store  storage.Backend
+	logger *zap.Logger
 }
 
-func NewTagHandlers(storage storage.Backend) tagHandlersGetter {
+func NewTagHandlers(storage storage.Backend, logger *zap.Logger) tagHandlersGetter {
+	log := logger.Named("handlers_tag")
+
 	return &tagHandlers{
-		store: storage,
+		store:  storage,
+		logger: log,
 	}
 }
 
@@ -32,12 +37,14 @@ func (t *tagHandlers) GetTasksByTagHandler(w http.ResponseWriter, r *http.Reques
 		Tag:    tag,
 	})
 	if err != nil {
+		t.logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	resp, err := json.Marshal(storageResp.Tasks)
 	if err != nil {
+		t.logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

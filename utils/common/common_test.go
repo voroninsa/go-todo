@@ -1,9 +1,15 @@
 package common
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func Test_TagsToSqlQueryString(t *testing.T) {
 	tags := []string{"a", "b", "c"}
 	res := TagsToSqlQueryString(tags)
-	t.Log(res)
+
+	exp := `{"a","b","c"}`
+	assert.Equal(t, exp, res)
 }
