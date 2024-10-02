@@ -2,6 +2,7 @@ package common
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -35,4 +36,20 @@ func UrlToDate(date string) (time.Time, error) {
 	resDate = resDate.AddDate(year-1, month-1, day-1)
 
 	return resDate, nil
+}
+
+func ErrorDatabase(err error) error {
+	return fmt.Errorf("error database: %w", err)
+}
+
+// Переводит слайс строк в формат "(tag1,tag2,tag3)"
+func TagsToSqlQueryString(tags []string) string {
+	res := "{"
+	for _, tag := range tags {
+		res += fmt.Sprintf(`"%s",`, tag)
+	}
+	res = res[:len(res)-1]
+	res += "}"
+
+	return res
 }

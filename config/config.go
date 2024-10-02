@@ -67,3 +67,7 @@ func storageTypeParser(storageType string) error {
 		return fmt.Errorf("unknown storage type: %s", storageType)
 	}
 }
+
+func (c *Config) IsPostgres() bool {
+	return c.StorageType == "postgres"
+}
