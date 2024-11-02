@@ -1,10 +1,12 @@
 package dto
 
 import (
+	"net/http"
 	"time"
 )
 
 type StorageMoves interface {
+	CheckCredantionals(header http.Header) error
 	CreateTask(task *Task) (int, error)
 	ReadTask(id int) (*Task, error)
 	UpdateTask(task *Task) error

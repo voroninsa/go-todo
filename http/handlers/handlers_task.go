@@ -36,6 +36,13 @@ func NewTaskHandlers(storage storage.Backend, logger *zap.Logger) taskHandlersGe
 }
 
 func (t *taskHandlers) PostTaskHandler(w http.ResponseWriter, r *http.Request) {
+	err := t.store.CheckCredantionals(r.Header)
+	if err != nil {
+		t.logger.Error(err.Error())
+		http.Error(w, errUnexpectedError, http.StatusUnauthorized)
+		return
+	}
+
 	var task dto.Task
 	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
 		t.logger.Error(err.Error())

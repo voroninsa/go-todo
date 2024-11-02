@@ -46,3 +46,8 @@ type StorageResponse struct {
 	// Список задач
 	Tasks []Task
 }
+
+type AuthRequest struct {
+	Auth_type string
+	Token     string
+}

@@ -3,7 +3,6 @@ package http
 import (
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/voroninsa/go-todo/config"
 	"github.com/voroninsa/go-todo/http/handlers"
@@ -12,7 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type ServerRunner interface {
+type serverRunner interface {
 	Run()
 }
 
@@ -28,9 +27,10 @@ type ServerParams struct {
 	Logger  *zap.Logger
 }
 
-func NewServer(params ServerParams) ServerRunner {
+func NewServer(params ServerParams) serverRunner {
 	handlers := handlers.NewHandlers(*params.Storage, params.Logger)
 	mux := NewRouter(handlers)
+
 	return &serverImpl{
 		mux:    mux,
 		config: params.Config,
@@ -44,6 +44,5 @@ func (s *serverImpl) Run() {
 	err := http.ListenAndServe(port, s.mux)
 	if err != nil {
 		s.logger.Sugar().Fatalf("fatal server error: ", err.Error())
-		os.Exit(1)
 	}
 }

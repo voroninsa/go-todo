@@ -7,6 +7,7 @@ import (
 
 const (
 	errUnexpectedError = "unexpected error"
+	errUnauthorized    = "unauthorized"
 )
 
 type HandlersGetter interface {

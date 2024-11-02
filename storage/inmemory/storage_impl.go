@@ -2,6 +2,7 @@ package inmemory
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/voroninsa/go-todo/utils/dto"
@@ -10,6 +11,11 @@ import (
 const (
 	errTaskNotFound = "task with id = %d not found"
 )
+
+func (ts *taskStore) CheckCredantionals(header http.Header) error {
+	// TODO
+	return nil
+}
 
 func (ts *taskStore) CreateTask(task *dto.Task) (int, error) {
 	ts.Lock()

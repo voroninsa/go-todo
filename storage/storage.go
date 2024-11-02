@@ -2,6 +2,7 @@ package storage
 
 import (
 	"errors"
+	"net/http"
 
 	"github.com/voroninsa/go-todo/config"
 	"github.com/voroninsa/go-todo/storage/inmemory"
@@ -19,6 +20,7 @@ type backendStorage struct {
 }
 
 type Backend interface {
+	CheckCredantionals(header http.Header) error
 	Create(dto.StorageRequest) (*dto.StorageResponse, error)
 	Read(dto.StorageRequest) (*dto.StorageResponse, error)
 	Update(dto.StorageRequest) error
@@ -38,6 +40,10 @@ func BackendFactory(conf *config.Config, logger *zap.Logger) Backend {
 	default:
 		return nil
 	}
+}
+
+func (ts *backendStorage) CheckCredantionals(header http.Header) error {
+	return ts.storage.CheckCredantionals(header)
 }
 
 func (ts *backendStorage) Create(req dto.StorageRequest) (*dto.StorageResponse, error) {
